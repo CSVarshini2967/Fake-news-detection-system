@@ -1,0 +1,32 @@
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datasets (too large for GitHub, download from Kaggle)
+data/*.csv
+!data/sample_news.csv
+
+# Trained models (regenerate with train.py or the notebook)
+models/*.pkl
+
+# Database and generated files
+app.db
+static/confusion_matrix.png
+
+# Secrets
+.env
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

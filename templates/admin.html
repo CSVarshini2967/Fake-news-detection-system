@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1>Admin</h1>
+
+<section class="stats">
+  <div><b>{{ stats.users }}</b> users</div>
+  <div><b>{{ stats.analyses }}</b> checks run</div>
+  <div><b>{{ stats.fake }}</b> flagged fake</div>
+  <div><b>{{ stats.genuine }}</b> flagged genuine</div>
+</section>
+
+<h2>Dataset and model</h2>
+<div class="two">
+  <form method="post" action="{{ url_for('admin_upload') }}" enctype="multipart/form-data" class="card">
+    <h3>Upload dataset</h3>
+    <p>CSV with a <code>text</code> column (or <code>title</code> + <code>text</code>) and a <code>label</code> column: 0 = fake, 1 = genuine.</p>
+    <input type="file" name="dataset" accept=".csv" required>
+    <button type="submit">Upload CSV</button>
+  </form>
+  <form method="post" action="{{ url_for('admin_retrain') }}" class="card">
+    <h3>Retrain model</h3>
+    <p>Trains on the current dataset and replaces the live model. Large datasets can take a few minutes.</p>
+    <button type="submit">Retrain model</button>
+  </form>
+</div>
+
+<h2>Model performance</h2>
+{% if metrics %}
+  <p>Trained {{ metrics.trained_at }} on {{ metrics.dataset.total }} articles
+     ({{ metrics.dataset.fake }} fake, {{ metrics.dataset.genuine }} genuine).
+     Live model: <b>{{ metrics.deployed_model }}</b>.</p>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-score</th></tr></thead>
+    <tbody>
+    {% for name, m in metrics.models.items() %}
+      <tr><td>{{ name }}</td><td>{{ m.accuracy }}</td><td>{{ m.precision }}</td><td>{{ m.recall }}</td><td>{{ m.f1 }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <h3>Confusion matrix ({{ metrics.deployed_model }})</h3>
+  <img src="{{ url_for('static', filename='confusion_matrix.png') }}" alt="Confusion matrix" width="320">
+{% else %}
+  <p>No model trained yet. Run <code>python train.py</code> or upload a dataset and retrain.</p>
+{% endif %}
+
+<h2>Latest checks from all users</h2>
+{% if recent %}
+<div class="scroll">
+<table>
+  <thead><tr><th>When</th><th>User</th><th>Text</th><th>Result</th></tr></thead>
+  <tbody>
+  {% for r in recent %}
+    <tr><td>{{ r.created_at }}</td><td>{{ r.username }}</td>
+        <td class="txt">{{ r.text[:100] }}{% if r.text|length > 100 %}…{% endif %}</td>
+        <td>{{ r.label }} ({{ r.confidence }}%)</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}<p>No checks yet.</p>{% endif %}
+{% endblock %}

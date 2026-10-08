@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Analyse news{% endblock %}
+{% block content %}
+<section class="intro">
+  <h1>Is this story reliable?</h1>
+  <p>Paste a headline or the full article. The model checks the writing against thousands of labelled real and fake stories.</p>
+</section>
+
+<form method="post" class="analyse">
+  <label for="text">News text</label>
+  <textarea id="text" name="text" rows="8" placeholder="Paste a headline or article here" required>{{ text }}</textarea>
+  <button type="submit">Check this text</button>
+  {% if not session.user_id %}<small>Log in to keep a record of your checks.</small>{% endif %}
+</form>
+
+{% if result %}
+<section class="result {{ 'genuine' if result.is_real else 'fake' }}">
+  <div class="verdict">
+    <h2>{{ result.label }}</h2>
+    <p class="conf">{{ result.confidence }}% confidence</p>
+  </div>
+  <div class="bar" role="img" aria-label="Fake {{ result.prob_fake }} percent, genuine {{ result.prob_real }} percent">
+    <span class="bar-fake" style="width: {{ result.prob_fake }}%"></span>
+    <span class="bar-real" style="width: {{ result.prob_real }}%"></span>
+  </div>
+  <p class="split"><span>Fake {{ result.prob_fake }}%</span><span>Genuine {{ result.prob_real }}%</span></p>
+  {% if result.warning %}<p class="note">{{ result.warning }}</p>{% endif %}
+  {% if result.keywords %}
+  <h3>Words that pushed this result</h3>
+  <ul class="chips">
+    {% for k in result.keywords %}<li>{{ k.word }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

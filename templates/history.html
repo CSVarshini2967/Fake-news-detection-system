@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}My history{% endblock %}
+{% block content %}
+<h1>My previous checks</h1>
+{% if rows %}
+<div class="scroll">
+<table>
+  <thead><tr><th>When</th><th>Text</th><th>Result</th><th>Confidence</th><th>Key words</th><th></th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td>{{ r.created_at }}</td>
+      <td class="txt">{{ r.text[:140] }}{% if r.text|length > 140 %}…{% endif %}</td>
+      <td><span class="tag {{ 'genuine' if r.label == 'Likely Genuine' else 'fake' }}">{{ r.label }}</span></td>
+      <td>{{ r.confidence }}%</td>
+      <td>{{ r.keywords }}</td>
+      <td><form method="post" action="{{ url_for('delete_history', item_id=r.id) }}"><button class="link">Delete</button></form></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p>No checks yet. <a href="{{ url_for('index') }}">Analyse your first story.</a></p>
+{% endif %}
+{% endblock %}
